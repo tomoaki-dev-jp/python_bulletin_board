@@ -1,0 +1,52 @@
+services:
+  web:
+    build: ./app
+    container_name: bulletin-web
+    ports: ["8000:8000"]
+    volumes:
+      - ./app:/app
+    environment:
+      DJANGO_DEBUG: "1"
+      DJANGO_SECRET_KEY: "dev-secret-key-change-me"
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: lampdb
+      DB_USER: lampuser
+      DB_PASSWORD: lamppass
+    depends_on:
+      - db
+    command: >
+     sh -lc "
+     python manage.py migrate &&
+     python manage.py runserver 0.0.0.0:8000
+     "
+
+  db:
+    image: mysql:8.0
+    container_name: bulletin-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: lampdb
+      MYSQL_USER: lampuser
+      MYSQL_PASSWORD: lamppass
+    ports: ["3306:3306"]
+    volumes:
+      - bulletin-db-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: bulletin-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: lampuser
+      PMA_PASSWORD: lamppass
+      UPLOAD_LIMIT: 300M
+    ports: ["8081:80"]
+    depends_on:
+      - db
+
+volumes:
+  bulletin-db-data: {}
