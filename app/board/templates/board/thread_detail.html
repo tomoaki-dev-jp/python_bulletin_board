@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>{{ thread.title }}</title>
+</head>
+<body>
+  <h1>{{ thread.title }}</h1>
+
+  {% for p in posts %}
+    <div>
+      {{ forloop.counter }} ：{{ p.name }}：{{ p.created_at|date:"Y/m/d H:i:s" }}<br>
+      <pre>{{ p.body }}</pre>
+    </div>
+    <hr>
+  {% empty %}
+    <p>まだレスがありません</p>
+  {% endfor %}
+
+  <p><a href="/">← スレ一覧へ</a></p>
+</body>
+</html>
