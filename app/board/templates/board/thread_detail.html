@@ -4,40 +4,58 @@
 <head>
   <meta charset="utf-8">
   <title>{{ thread.title }}</title>
-
   <link rel="stylesheet" href="{% static 'board/vendor/bootstrap/css/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'board/css/stylish.css' %}">
 </head>
 <body>
-
   <div class="wrap">
     <section class="section">
       <h2>{{ thread.title }}</h2>
 
       <div class="list">
         {% for p in posts %}
-          <div class="row">
+          <div class="row" id="res-{{ p.number }}">
             <div>
-              <b>{{ forloop.counter }} ：{{ p.name }}</b>
-              <small style="margin-left:12px;">{{ p.created_at|date:"Y/m/d H:i:s" }}</small>
+              <b>{{ p.number }} ：{{ p.name }}{% if p.trip %}{{ p.trip }}{% endif %}</b>
+              <small style="margin-left:10px;">ID:{{ p.poster_id }}</small>
+              <small style="margin-left:10px;">{{ p.created_at|date:"Y/m/d H:i:s" }}</small>
             </div>
             <div style="grid-column:1 / -1; margin-top:10px;">
-              <pre style="margin:0; white-space:pre-wrap;">{{ p.body }}</pre>
+              <span style="white-space:normal;">{{ p.body_html|safe }}</span>
             </div>
           </div>
         {% empty %}
-          <div class="row">
-            <small>まだレスがありません</small>
-          </div>
+          <div class="row"><small>まだレスがありません</small></div>
         {% endfor %}
       </div>
 
+      <hr>
+
+      {% if thread.is_locked or thread.is_archived %}
+        <div class="row"><small>このスレには書き込めません（ロック/落ち）</small></div>
+      {% else %}
+        <form method="post" style="margin-top:16px;">
+          {% csrf_token %}
+          <div style="display:grid; gap:10px;">
+            <input name="name" value="{{ form.name.value|default:'' }}" placeholder="名前（名無しさん / nori#pass）"
+                   style="padding:10px 12px; border-radius:12px; border:1px solid var(--line);">
+            <input name="email" value="{{ form.email.value|default:'' }}" placeholder="メール（sage）"
+                   style="padding:10px 12px; border-radius:12px; border:1px solid var(--line);">
+            <textarea name="body" rows="5" placeholder="本文"
+                      style="padding:10px 12px; border-radius:12px; border:1px solid var(--line);">{{ form.body.value|default:'' }}</textarea>
+            <button class="btn" type="submit">書き込む</button>
+          </div>
+          {% if form.errors %}
+            <div style="margin-top:10px; color:#d33;">{{ form.errors }}</div>
+          {% endif %}
+        </form>
+      {% endif %}
+
       <div style="margin-top:16px;">
-        <a class="btn" href="/">← スレ一覧へ</a>
+        <a class="btn" href="/{{ board.slug }}/">← スレ一覧</a>
+        <a class="btn" href="/{{ board.slug }}/dat/{{ thread.id }}.dat">dat</a>
       </div>
     </section>
   </div>
-
-  <script src="{% static 'board/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

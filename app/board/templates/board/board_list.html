@@ -1,0 +1,25 @@
+{% load static %}
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>板一覧</title>
+  <link rel="stylesheet" href="{% static 'board/vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'board/css/stylish.css' %}">
+</head>
+<body>
+  <div class="wrap">
+    <section class="section">
+      <h2>板一覧</h2>
+      <div class="list">
+        {% for b in boards %}
+          <div class="row">
+            <b><a href="/{{ b.slug }}/">{{ b.name }}</a></b>
+            <small>{{ b.description }}</small>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</body>
+</html>

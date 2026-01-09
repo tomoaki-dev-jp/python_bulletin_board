@@ -1,0 +1,42 @@
+{% load static %}
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>{{ board.name }} - スレ一覧</title>
+  <link rel="stylesheet" href="{% static 'board/vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'board/css/stylish.css' %}">
+</head>
+<body>
+  <div class="wrap">
+    <section class="section">
+      <h2>{{ board.name }}</h2>
+
+      <form method="post" style="margin: 16px 0;">
+        {% csrf_token %}
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <input type="text" name="title" maxlength="200" required
+                 value="{{ form.title.value|default:'' }}"
+                 placeholder="スレタイ（sageはレスで）"
+                 style="flex:1; min-width:260px; padding:12px 14px; border-radius:12px; border:1px solid var(--line);">
+          <button class="btn" type="submit">スレ立て</button>
+        </div>
+        {% if form.errors %}
+          <div style="margin-top:10px; color:#d33;">{{ form.errors }}</div>
+        {% endif %}
+      </form>
+
+      <div class="list">
+        {% for t in threads %}
+          <div class="row">
+            <b><a href="/{{ board.slug }}/thread/{{ t.id }}/">{{ t.title }}</a></b>
+            <small>{{ t.posts_count }} / {{ board.max_posts_per_thread }}</small>
+          </div>
+        {% empty %}
+          <div class="row"><small>まだスレがありません</small></div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</body>
+</html>
