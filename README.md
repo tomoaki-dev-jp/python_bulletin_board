@@ -6,13 +6,15 @@ Django 5 で動くシンプルな掲示板アプリです。板一覧 → スレ
 - 板/スレ/レスの基本機能
 - sage（メール欄に `sage` を含むと bump しない）
 - トリップ（`name#password` 形式）
-- 簡易 dat 出力（`/dat/<id>.dat`）
+- 日替わりID（スレごと）
+- 簡易 dat 出力（`/<board_slug>/dat/<id>.dat`）
 - 連投規制（スレ立て 10 秒、レス投稿 3 秒）
 - アンカーリンク（`>>123`）
+- REST API（スレ一覧/詳細/投稿）
 
 ## 動作要件
 - Python 3.12+
-- 依存: `Django`, `mysqlclient`, `python-dotenv`（`app/requirements.txt`）
+- 依存: `Django`, `mysqlclient`, `python-dotenv`, `djangorestframework`（`app/requirements.txt`）
 
 ## ローカル実行
 ```bash
@@ -27,7 +29,7 @@ python app/manage.py runserver
 ブラウザで `http://127.0.0.1:8000/` を開きます。
 
 ### 初期データ（板の作成）
-板は管理画面から作成してください。
+管理画面から作成する場合:
 ```bash
 python app/manage.py createsuperuser
 # http://127.0.0.1:8000/admin/ から Board を作成
@@ -40,6 +42,11 @@ python app/manage.py shell
 ```python
 from board.models import Board
 Board.objects.create(slug="vip", name="VIP", description="雑談")
+```
+
+### サンプルデータ
+```bash
+python app/manage.py loaddata board_test
 ```
 
 ## Docker で実行
@@ -56,6 +63,20 @@ docker compose up --build
 - `/<board_slug>/` : スレ一覧
 - `/<board_slug>/thread/<thread_id>/` : スレ詳細
 - `/<board_slug>/dat/<thread_id>.dat` : dat 出力
+
+## REST API
+- `GET /api/<board_slug>/threads/` : スレ一覧
+- `GET /api/<board_slug>/thread/<thread_id>/` : スレ詳細 + レス一覧
+- `POST /api/<board_slug>/thread/<thread_id>/posts/` : レス投稿
+
+POST body 例:
+```json
+{
+  "name": "名無しさん#password",
+  "email": "sage",
+  "body": "こんにちは"
+}
+```
 
 ## 補足
 - `DEBUG=True` の開発用設定です。運用時は `SECRET_KEY` と `DEBUG` などを適切に管理してください。

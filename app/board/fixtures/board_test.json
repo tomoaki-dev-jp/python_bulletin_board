@@ -1,0 +1,66 @@
+[
+{
+  "model": "board.board",
+  "pk": 1,
+  "fields": {
+    "slug": "vip",
+    "name": "vip",
+    "description": "雑談・なんでもあり",
+    "max_posts_per_thread": 1000,
+    "bump_limit": 500,
+    "created_at": "2026-01-09T02:50:04.708Z"
+  }
+},
+{
+  "model": "board.thread",
+  "pk": 1,
+  "fields": {
+    "board": 1,
+    "title": "テスト",
+    "is_sticky": false,
+    "is_locked": false,
+    "is_archived": false,
+    "is_deleted": false,
+    "created_at": "2026-01-09T02:52:26.195Z",
+    "last_post_at": "2026-01-17T05:33:36.932Z",
+    "last_bumped_at": "2026-01-09T02:52:26Z",
+    "posts_count": 2
+  }
+},
+{
+  "model": "board.post",
+  "pk": 1,
+  "fields": {
+    "thread": 1,
+    "number": 1,
+    "name": "名無しさん",
+    "trip": null,
+    "email": "sage",
+    "body": "APIから書き込みテスト ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!!",
+    "poster_id": "",
+    "ip_hash": "",
+    "user_agent": "",
+    "is_sage": true,
+    "is_deleted": false,
+    "created_at": "2026-01-17T05:02:50.171Z"
+  }
+},
+{
+  "model": "board.post",
+  "pk": 2,
+  "fields": {
+    "thread": 1,
+    "number": 2,
+    "name": "nori",
+    "trip": "◆w6Q.7tRr0N",
+    "email": "sage",
+    "body": "APIでもトリップ＆ID出るテスト(￣ー￣)ﾆﾔﾘ",
+    "poster_id": "KNI375YY",
+    "ip_hash": "1909d84eb8875e7c2cbffbfea9622a1dca84a5731dc1c0d3c53825d3c1c436d5",
+    "user_agent": "curl/8.5.0",
+    "is_sage": true,
+    "is_deleted": false,
+    "created_at": "2026-01-17T05:33:36.932Z"
+  }
+}
+]
