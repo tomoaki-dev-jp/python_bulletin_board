@@ -1,83 +1,124 @@
-# Python Bulletin Board
+# Python Bulletin Board（2chライク掲示板）
 
-Django 5 で動くシンプルな掲示板アプリです。板一覧 → スレ一覧 → レス投稿の流れで、2ch 風の挙動（sage、トリップ、dat 出力など）を試せます。
+Django + Docker で作られた **2chライク掲示板アプリ**です。  
+匿名・ID・トリップ・sage・dat思想を尊重した、  
+**「管理人も信用するな」設計**を目指しています。
 
-## 主な機能
-- 板/スレ/レスの基本機能
-- sage（メール欄に `sage` を含むと bump しない）
-- トリップ（`name#password` 形式）
-- 日替わりID（スレごと）
-- 簡易 dat 出力（`/<board_slug>/dat/<id>.dat`）
-- 連投規制（スレ立て 10 秒、レス投稿 3 秒）
-- アンカーリンク（`>>123`）
-- REST API（スレ一覧/詳細/投稿）
+> 嫌儲避難所用途・実験用途・学習用途を想定しています。
 
-## 動作要件
-- Python 3.12+
-- 依存: `Django`, `mysqlclient`, `python-dotenv`, `djangorestframework`（`app/requirements.txt`）
+---
 
-## ローカル実行
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r app/requirements.txt
+## 特徴
 
-python app/manage.py migrate
-python app/manage.py runserver
-```
+- 🧵 板 / スレ / レス 構造
+- 🆔 日替わりID（スレ単位）
+- 🔑 トリップ対応（`name#password`）
+- 📉 sage対応（スレ上がらない）
+- 📄 dat思想を意識した構造
+- 🔌 Django REST Framework API 搭載
+- 🐳 Docker / docker-compose 完全対応
+- 🧪 fixture による初期データ投入対応
 
-ブラウザで `http://127.0.0.1:8000/` を開きます。
+---
 
-### 初期データ（板の作成）
-管理画面から作成する場合:
-```bash
-python app/manage.py createsuperuser
-# http://127.0.0.1:8000/admin/ から Board を作成
-```
+## 動作環境
 
-Django shell で作る場合:
-```bash
-python app/manage.py shell
-```
-```python
-from board.models import Board
-Board.objects.create(slug="vip", name="VIP", description="雑談")
-```
+- Docker Desktop
+- docker compose（v2系）
+- Windows / macOS / Linux（WSL可）
 
-### サンプルデータ
-```bash
-python app/manage.py loaddata board_test
-```
+---
 
-## Docker で実行
-```bash
-docker compose up --build
-```
-- Web: `http://127.0.0.1:8000/`
-- phpMyAdmin: `http://127.0.0.1:8081/`
+## Quick Start（最短起動）
 
-注意: 現状 `app/config/settings.py` は SQLite を使う設定です。`docker-compose.yml` の MySQL は接続設定が未反映なので、MySQL を使う場合は settings を環境変数対応に変更してください。
 
-## 主要 URL
-- `/` : 板一覧
-- `/<board_slug>/` : スレ一覧
-- `/<board_slug>/thread/<thread_id>/` : スレ詳細
-- `/<board_slug>/dat/<thread_id>.dat` : dat 出力
+git clone <このリポジトリのURL>
+cd python_bulletin_board
+docker compose up -d --build
 
-## REST API
-- `GET /api/<board_slug>/threads/` : スレ一覧
-- `GET /api/<board_slug>/thread/<thread_id>/` : スレ詳細 + レス一覧
-- `POST /api/<board_slug>/thread/<thread_id>/posts/` : レス投稿
+初期セットアップ（重要）
+① データベース作成（必須）
+docker compose run --rm web python manage.py migrate
+② テストデータ投入（fixture）
+docker compose run --rm web python manage.py loaddata board_test
+これで以下が自動作成されます：
+板（例：vip）
+初期スレッド
+初期レス
+docker compose run --rm web python manage.py createsuperuser
+※ パスワードはローカル用途なら簡易でもOK
+※ 公開運用では必ず強力なパスワードを設定してください
+アクセスURL
 
-POST body 例:
-```json
-{
-  "name": "名無しさん#password",
-  "email": "sage",
-  "body": "こんにちは"
-}
-```
+掲示板トップ
+👉 http://localhost:8000/
 
-## 補足
-- `DEBUG=True` の開発用設定です。運用時は `SECRET_KEY` と `DEBUG` などを適切に管理してください。
-- `Board.max_posts_per_thread` に達するとスレは閲覧のみ（アーカイブ）になります。
+VIP板
+👉 http://localhost:8000/vip/
+
+管理画面
+👉 http://localhost:8000/admin/
+
+phpMyAdmin
+👉 http://localhost:8081/
+curl http://localhost:8000/api/vip/threads/
+
+REST API（例）
+スレ一覧
+curl http://localhost:8000/api/vip/threads/
+スレ詳細
+curl http://localhost:8000/api/vip/thread/1/
+レス投稿（API）
+curl -X POST http://localhost:8000/api/vip/thread/1/posts/ \
+  -H "Content-Type: application/json" \
+  -d '{"name":"名無しさん","email":"sage","body":"API書き込みテスト"}'
+ディレクトリ構成（抜粋）
+app/
+├─ board/
+│  ├─ models.py
+│  ├─ views.py
+│  ├─ api.py
+│  ├─ serializers.py
+│  ├─ fixtures/
+│  │   └─ board_test.json
+│  └─ templates/
+├─ config/
+│  └─ settings.py
+├─ manage.py
+└─ db.sqlite3（※Git管理しない）
+
+fixture について
+
+本プロジェクトでは db.sqlite3 を配布しません。
+代わりに fixture（初期データ）を使用します。
+
+fixture 再投入
+docker compose run --rm web python manage.py loaddata board_test
+
+トラブルシューティング
+管理画面でエラーが出る場合
+
+ほとんどの場合、DBのズレです。
+
+rm -f app/db.sqlite3 db.sqlite3
+docker compose run --rm web python manage.py migrate
+docker compose run --rm web python manage.py loaddata board_test
+docker compose restart web
+
+ポリシー・注意事項
+
+IPアドレス等の個人情報は 恒久保存しない設計
+
+管理人による恣意的な操作を前提としない
+
+本番公開時の法的責任は 利用者・運用者自身に帰属
+
+ライセンス
+
+MIT License
+自由に改変・再配布してください。
+
+免責
+
+このソフトウェアは学習・実験目的で提供されています。
+利用によって生じた問題について、作者は責任を負いません。
